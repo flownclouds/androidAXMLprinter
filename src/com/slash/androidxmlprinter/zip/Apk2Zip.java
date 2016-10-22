@@ -5,8 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.text.TextUtils;
+
 public class Apk2Zip {
-	public static void convertApk2Zip(String apkPath,String zipPath){
+	public static boolean convertApk2Zip(String apkPath,String zipPath){
+		if(TextUtils.isEmpty(apkPath)||TextUtils.isEmpty(zipPath)){
+			return false;
+		}
 		FileInputStream reader = null;
 		FileOutputStream writer = null;
 		try {
@@ -20,8 +25,10 @@ public class Apk2Zip {
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		} finally{
 			if(reader!=null){
 				try {
@@ -38,6 +45,6 @@ public class Apk2Zip {
 				}
 			}
 		}
-		
+		return true;
 	}
 }

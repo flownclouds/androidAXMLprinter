@@ -1,6 +1,10 @@
 package com.slash.androidxmlprinter.xmlprinter;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 import android.util.Log;
 
@@ -10,12 +14,17 @@ public class AXMLPrinter {
 	    private static final float[] RADIX_MULTS = new float[]{0.00390625F, 3.051758E-5F, 1.192093E-7F, 4.656613E-10F};
 	    private static final String[] DIMENSION_UNITS = new String[]{"px", "dip", "sp", "pt", "in", "mm", "", ""};
 	    private static final String[] FRACTION_UNITS = new String[]{"%", "%p", "", "", "", "", "", ""};
+		private static File file;
+		private static PrintStream ps;
 
 	    public AXMLPrinter() {
 	    }
 
 	    public static void decodeManifest(String[] arguments){
-	    	arguments = new String[]{"D://AndroidManifest.xml"};
+	    	if(arguments.length >= 2){
+	    		file = new File(arguments[1]);
+	    	}
+	    	
 	        if(arguments.length < 1) {
 	            log("Usage: AXMLPrinter <binary xml file>", new Object[0]);
 	        } else {
@@ -85,8 +94,18 @@ public class AXMLPrinter {
 	    }
 
 	    private static void log(String format, Object... arguments) {
-	        System.out.printf(format, arguments);
-	        System.out.println();
+	    	try {
+	    		if(file==null){
+	    			return;
+	    		}
+	    		if(ps == null){
+	    			ps = new PrintStream(new FileOutputStream(file,true));
+	    		}
+				ps.printf(format, arguments);
+				ps.println();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 	        
 	    }
 
