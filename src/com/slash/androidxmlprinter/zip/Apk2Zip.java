@@ -1,5 +1,6 @@
 package com.slash.androidxmlprinter.zip;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -8,7 +9,7 @@ import java.io.IOException;
 import android.text.TextUtils;
 
 public class Apk2Zip {
-	public static boolean convertApk2Zip(String apkPath,String zipPath){
+	public static boolean copyAPK2ZIP(String apkPath,String zipPath){
 		if(TextUtils.isEmpty(apkPath)||TextUtils.isEmpty(zipPath)){
 			return false;
 		}
@@ -46,5 +47,35 @@ public class Apk2Zip {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * 将APK文件重命名为zip文件
+	 * @param srcApk
+	 * @return
+	 */
+	public static boolean renameApk2Zip(String srcApk,String dstZip){
+		File srcFile = new File(srcApk);
+		if(srcFile.exists()){
+//			String dstZip = srcApk.substring(0,srcApk.lastIndexOf("."))+".zip";
+			srcFile.renameTo(new File(dstZip));
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 还原APK文件的后缀名
+	 * @param srcApk
+	 * @return
+	 */
+	public static boolean resetApk(String srcApk){
+		String dstZip = srcApk.substring(0,srcApk.lastIndexOf("."))+".zip";
+		File zipFile = new File(dstZip);
+		if(zipFile.exists()){
+			zipFile.renameTo(new File(srcApk));
+			return true;
+		}
+		return false;
 	}
 }

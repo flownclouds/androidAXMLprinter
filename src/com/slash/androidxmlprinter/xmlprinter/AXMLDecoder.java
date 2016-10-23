@@ -2,31 +2,53 @@ package com.slash.androidxmlprinter.xmlprinter;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
-
-import android.util.Log;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.slash.androidxmlprinter.axml.AXmlResourceParser;
+import com.slash.androidxmlprinter.zip.Apk2Zip;
+import com.slash.androidxmlprinter.zip.ZipReader;
 
-public class AXMLPrinter {
+public class AXMLDecoder {
 	    private static final float[] RADIX_MULTS = new float[]{0.00390625F, 3.051758E-5F, 1.192093E-7F, 4.656613E-10F};
 	    private static final String[] DIMENSION_UNITS = new String[]{"px", "dip", "sp", "pt", "in", "mm", "", ""};
 	    private static final String[] FRACTION_UNITS = new String[]{"%", "%p", "", "", "", "", "", ""};
-		private static File file;
+		private static final Object PERMISSION = "uses-permission";
 		private static PrintStream ps;
 
-	    public AXMLPrinter() {
+	    public AXMLDecoder() {
 	    }
 
-	    public static void decodeManifest(String[] arguments){
-	    	if(arguments.length >= 2){
-	    		file = new File(arguments[1]);
-	    	}
+	    public static List<String> getPermissions(String apkPath,String outXMLpath){
+	    	String outZipPath = apkPath.substring(0,apkPath.lastIndexOf("."))+".zip";
+	    	boolean converted = Apk2Zip.renameApk2Zip(apkPath,outZipPath);
+			if(!converted){
+				return null;
+			}
+			boolean read = ZipReader.readManifestFromZip(outZipPath,outXMLpath);
+			if(!read){
+				return null;
+			} 
+			List<String> permissions = new ArrayList<>();
+			decodeManifest(permissions,new String[]{outXMLpath});
+			Apk2Zip.resetApk(apkPath);
+			File outXML = new File(outXMLpath);
+			if(outXML.exists()){
+				outXML.delete();
+			}
+			
+			return permissions;
+	    }
+	    
+	    public static void decodeManifest(List<String> permissions ,String[] arguments){
+//	    	
+//	    	if(arguments.length >= 2){
+//	    		file = new File(arguments[1]);
+//	    	}
 	    	
 	        if(arguments.length < 1) {
-	            log("Usage: AXMLPrinter <binary xml file>", new Object[0]);
+//	            log("Usage: AXMLPrinter <binary xml file>", new Object[0]);
 	        } else {
 	            try {
 	                AXmlResourceParser e = new AXmlResourceParser();
@@ -40,36 +62,23 @@ public class AXMLPrinter {
 	                        if(type == 1) {
 	                            return;
 	                        }
-
 	                        switch(type) {
 	                        case 0:
-	                            log("<?xml version=\"1.0\" encoding=\"utf-8\"?>", new Object[0]);
 	                        case 1:
 	                        default:
 	                            break;
 	                        case 2:
-	                            log("%s<%s%s", new Object[]{indent, getNamespacePrefix(e.getPrefix()), e.getName()});
-	                            indent.append("\t");
-	                            int namespaceCountBefore = e.getNamespaceCount(e.getDepth() - 1);
-	                            int namespaceCount = e.getNamespaceCount(e.getDepth());
-
-	                            int i;
-	                            for(i = namespaceCountBefore; i != namespaceCount; ++i) {
-	                                log("%sxmlns:%s=\"%s\"", new Object[]{indent, e.getNamespacePrefix(i), e.getNamespaceUri(i)});
-	                            }
-
-	                            for(i = 0; i != e.getAttributeCount(); ++i) {
-	                                log("%s%s%s=\"%s\"", new Object[]{indent, getNamespacePrefix(e.getAttributePrefix(i)), e.getAttributeName(i), getAttributeValue(e, i)});
-	                            }
-
-	                            log("%s>", new Object[]{indent});
+	                        	String name = e.getName();
+	                        	for(int i=0 ;i != e.getAttributeCount(); ++i){
+	                        		if(name.equals(PERMISSION)){
+	                        			String attrValue = getAttributeValue(e,i);
+	                        			String permission = AttrValueConverter.convert(attrValue);
+	                        			if(!permissions.contains(permission)){
+	                        				permissions.add(permission);
+	                        			}
+	                        		}
+	                        	}
 	                            break;
-	                        case 3:
-	                            indent.setLength(indent.length() - "\t".length());
-	                            log("%s</%s%s>", new Object[]{indent, getNamespacePrefix(e.getPrefix()), e.getName()});
-	                            break;
-	                        case 4:
-	                            log("%s%s", new Object[]{indent, e.getText()});
 	                        }
 	                    }
 	                }
@@ -91,22 +100,6 @@ public class AXMLPrinter {
 
 	    private static String getPackage(int id) {
 	        return id >>> 24 == 1?"android:":"";
-	    }
-
-	    private static void log(String format, Object... arguments) {
-	    	try {
-	    		if(file==null){
-	    			return;
-	    		}
-	    		if(ps == null){
-	    			ps = new PrintStream(new FileOutputStream(file,true));
-	    		}
-				ps.printf(format, arguments);
-				ps.println();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-	        
 	    }
 
 	    public static float complexToFloat(int complex) {
