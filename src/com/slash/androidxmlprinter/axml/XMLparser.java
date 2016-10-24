@@ -9,7 +9,7 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.slash.androidxmlprinter.xmlprinter.AttrValueConverter;
+import com.slash.androidxmlprinter.android.AttrValueConverter;
 
 import android.text.TextUtils;
 import android.util.Log;
