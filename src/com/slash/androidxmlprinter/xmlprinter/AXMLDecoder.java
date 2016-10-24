@@ -20,9 +20,10 @@ public class AXMLDecoder {
 	    public AXMLDecoder() {
 	    }
 
-	    public static List<String> getPermissions(String apkPath,String outXMLpath){
+	    public static List<String> getPermissions(String apkPath){
+	    	String outXMLpath = apkPath.substring(0,apkPath.lastIndexOf("/")+1)+"AndroidManifest.xml";
 	    	String outZipPath = apkPath.substring(0,apkPath.lastIndexOf("."))+".zip";
-	    	boolean converted = Apk2Zip.renameApk2Zip(apkPath,outZipPath);
+	    	boolean converted = Apk2Zip.renameFile(apkPath,outZipPath);
 			if(!converted){
 				return null;
 			}
@@ -31,11 +32,14 @@ public class AXMLDecoder {
 				return null;
 			} 
 			List<String> permissions = new ArrayList<>();
+			
 			decodeManifest(permissions,new String[]{outXMLpath});
-			Apk2Zip.resetApk(apkPath);
-			File outXML = new File(outXMLpath);
-			if(outXML.exists()){
-				outXML.delete();
+			
+			Apk2Zip.renameFile(outZipPath, apkPath);
+			
+			File outXMLFile = new File(outXMLpath);
+			if(outXMLFile.exists()){
+				outXMLFile.delete();
 			}
 			
 			return permissions;

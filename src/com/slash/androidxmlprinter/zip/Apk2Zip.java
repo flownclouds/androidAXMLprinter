@@ -50,32 +50,18 @@ public class Apk2Zip {
 	}
 	
 	/**
-	 * 将APK文件重命名为zip文件
-	 * @param srcApk
+	 * 重命名文件
+	 * @param srcPath 原始文件路径
+	 * @param dstPath 重命名后的文件路径
 	 * @return
 	 */
-	public static boolean renameApk2Zip(String srcApk,String dstZip){
-		File srcFile = new File(srcApk);
+	public static boolean renameFile(String srcPath,String dstPath){
+		File srcFile = new File(srcPath);
 		if(srcFile.exists()){
-//			String dstZip = srcApk.substring(0,srcApk.lastIndexOf("."))+".zip";
-			srcFile.renameTo(new File(dstZip));
+			srcFile.renameTo(new File(dstPath));
 			return true;
 		}
 		return false;
 	}
 	
-	/**
-	 * 还原APK文件的后缀名
-	 * @param srcApk
-	 * @return
-	 */
-	public static boolean resetApk(String srcApk){
-		String dstZip = srcApk.substring(0,srcApk.lastIndexOf("."))+".zip";
-		File zipFile = new File(dstZip);
-		if(zipFile.exists()){
-			zipFile.renameTo(new File(srcApk));
-			return true;
-		}
-		return false;
-	}
 }
