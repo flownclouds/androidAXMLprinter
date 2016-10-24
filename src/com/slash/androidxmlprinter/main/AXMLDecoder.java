@@ -11,6 +11,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.slash.androidxmlprinter.android.AttrValueConverter;
 import com.slash.androidxmlprinter.axml.AXmlResourceParser;
@@ -59,7 +60,7 @@ public class AXMLDecoder {
 					if(name.equals(MANIFEST_NAME)){
 						decodeManifest(permissions, zipReader);
 						break;
-					}
+					} 
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -90,11 +91,10 @@ public class AXMLDecoder {
 	                        if(type == 1) {
 	                            return;
 	                        }
-	                        
 	                        if(type == 2){
 	                        	String name = e.getName();
-	                        	for(int i=0 ;i != e.getAttributeCount(); ++i){
-	                        		if(name.equals(PERMISSION)){
+	                        	if(name.equals(PERMISSION)){
+	                        		for(int i=0 ;i != e.getAttributeCount(); ++i){
 	                        			String attrValue = getAttributeValue(e,i);
 	                        			String permission = AttrValueConverter.convert(attrValue);
 	                        			if(!permissions.contains(permission)){

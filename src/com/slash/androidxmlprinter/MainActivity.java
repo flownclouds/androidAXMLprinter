@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 					return ;
 				}
 				
-				Log.e(TAG, "Permission get !"+permissions.size());
+				Log.e(TAG, "Permission get !  "+permissions.size());
 				for (String p : permissions) {
 					Log.e(TAG, "permission = "+p);
 				}
